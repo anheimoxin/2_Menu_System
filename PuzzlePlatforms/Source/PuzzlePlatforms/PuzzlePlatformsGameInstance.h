@@ -30,4 +30,6 @@ public:
 		void Join(FString& Address);
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
+
+	class UMainMenu* Menu;
 };

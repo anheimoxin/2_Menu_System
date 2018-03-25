@@ -37,33 +37,26 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 		UE_LOG(LogTemp,Error,TEXT("MenuClass is nullptr"));
 		return;
 	}
-	UMainMenu* Menu = CreateWidget<UMainMenu>(this, MenuClass);
+	
+	Menu = CreateWidget<UMainMenu>(this, MenuClass);
 	if (!ensure(Menu != nullptr))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Menu is nullptr"));
 		return;
 	}
-	Menu->AddToViewport();
-
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	if (!ensure(PlayerController != nullptr))
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController in nullptr"));
-		return;
-	}
-
-	FInputModeUIOnly InputModeData;
-	InputModeData.SetWidgetToFocus(Menu->TakeWidget());
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-	PlayerController->SetInputMode(InputModeData);
-	PlayerController->bShowMouseCursor = true;
+	
+	Menu->Setup();
 
 	Menu->SetMenuInterface(this);
 }
 
 void UPuzzlePlatformsGameInstance::Host()
 {
+	if (Menu!=nullptr)
+	{
+		Menu->Teardown();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr))
 	{
