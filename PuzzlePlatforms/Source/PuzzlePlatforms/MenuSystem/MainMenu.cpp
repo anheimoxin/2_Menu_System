@@ -3,6 +3,7 @@
 #include "MainMenu.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/EditableTextBox.h"
 #include "MenuInterface.h"
 
 
@@ -16,6 +17,12 @@ bool UMainMenu::Initialize()
 
 	if (!ensure(HostButton != nullptr)) return false;
 	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
+
+	if (!ensure(CancelJoinMenuButton != nullptr)) return false;
+	CancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+
+	if (!ensure(ConfirmJoinMenuButton != nullptr)) return false;
+	ConfirmJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
 
 	return true;
 }
@@ -81,10 +88,32 @@ void UMainMenu::HostServer()
 	}
 }
 
-void UMainMenu::OpenJoinMenu()
+void UMainMenu::JoinServer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("I'm gonna join a server"));
+	if (MenuInterface != nullptr) {
+		if (!ensure(IPAddressField!=nullptr))
+		{
+			UE_LOG(LogTemp, Error, TEXT("IPAddressField is nullptr"));
+			return;
+		}
+		const FString& Address = IPAddressField->GetText().ToString();
+		MenuInterface->Join(Address);
+	}
+}
+
+void UMainMenu::OpenJoinMenu()
+{
+	UE_LOG(LogTemp, Warning, TEXT("I'm gonna open JoinMenu"));
 	if (!ensure(MenuSwitcher != nullptr)) return;
 	if (!ensure(JoinMenu != nullptr)) return;
 	MenuSwitcher->SetActiveWidget(JoinMenu);
+}
+
+void UMainMenu::OpenMainMenu()
+{
+	UE_LOG(LogTemp, Warning, TEXT("I'm gonna open MainMenu"));
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(MainMenu != nullptr)) return;
+	MenuSwitcher->SetActiveWidget(MainMenu);
 }

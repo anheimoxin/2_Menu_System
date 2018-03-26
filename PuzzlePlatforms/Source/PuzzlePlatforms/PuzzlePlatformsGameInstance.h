@@ -27,7 +27,7 @@ public:
 		void Host();
 
 	UFUNCTION(Exec)
-		void Join(FString& Address);
+		void Join(const FString& Address);
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
 
