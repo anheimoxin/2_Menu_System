@@ -8,6 +8,7 @@
 #include "PlatformTrigger.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuSystem/MainMenu.h"
+#include "MenuSystem/MenuWidget.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer &ObjectInitializer) {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MainMenu"));
@@ -18,6 +19,17 @@ UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitiali
 	}
 	MenuClass = MenuBPClass.Class;
 	UE_LOG(LogTemp, Warning, TEXT("Class name %s"), *MenuClass->GetName());
+
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/MenuSystem/WBP_InGameMenu"));
+	if (!ensure(MenuBPClass.Class != nullptr))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Can't find MenuBPClass"));
+		return;
+	}
+	InGameMenuClass = InGameMenuBPClass.Class;
+	UE_LOG(LogTemp, Warning, TEXT("Class name %s"), *InGameMenuClass->GetName());
+
+
 	UE_LOG(LogTemp, Warning, TEXT("GameInstance Constructor"));
 };
 
@@ -45,6 +57,27 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 		return;
 	}
 	
+	Menu->Setup();
+
+	Menu->SetMenuInterface(this);
+}
+
+
+void UPuzzlePlatformsGameInstance::InGameLoadMenu()
+{
+	if (!ensure(InGameMenuClass != nullptr))
+	{
+		UE_LOG(LogTemp, Error, TEXT("InGameMenuClass is nullptr"));
+		return;
+	}
+
+	UMenuWidget* Menu = CreateWidget<UMenuWidget>(this, InGameMenuClass);
+	if (!ensure(Menu != nullptr))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Menu is nullptr"));
+		return;
+	}
+
 	Menu->Setup();
 
 	Menu->SetMenuInterface(this);
@@ -96,4 +129,15 @@ void UPuzzlePlatformsGameInstance::Join(const FString & Address)
 		return;
 	}
 	PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+}
+
+void UPuzzlePlatformsGameInstance::LoadMainMenu()
+{
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!ensure(PlayerController != nullptr))
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController in nullptr"));
+		return;
+	}
+	PlayerController->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
 }

@@ -24,61 +24,12 @@ bool UMainMenu::Initialize()
 	if (!ensure(ConfirmJoinMenuButton != nullptr)) return false;
 	ConfirmJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
 
+	if (!ensure(QuitButton != nullptr)) return false;
+	QuitButton->OnClicked.AddDynamic(this, &UMainMenu::QuitPressed);
+
 	return true;
 }
 
-void UMainMenu::SetMenuInterface(IMenuInterface* MenuInterface)
-{
-	this->MenuInterface = MenuInterface;
-}
-
-void UMainMenu::Setup()
-{
-	this->AddToViewport();
-
-	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr))
-	{
-		UE_LOG(LogTemp, Error, TEXT("World is nullptr"));
-		return;
-	}
-
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (!ensure(PlayerController != nullptr))
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController in nullptr"));
-		return;
-	}
-
-	FInputModeUIOnly InputModeData;
-	InputModeData.SetWidgetToFocus(this->TakeWidget());
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-	PlayerController->SetInputMode(InputModeData);
-	PlayerController->bShowMouseCursor = true;
-}
-
-void UMainMenu::Teardown()
-{
-	this->RemoveFromViewport();
-	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr))
-	{
-		UE_LOG(LogTemp, Error, TEXT("World in nullptr"));
-		return;
-	}
-
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (!ensure(PlayerController != nullptr))
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController is nullptr"));
-		return;
-	}
-
-	FInputModeGameOnly InputModeData;
-	PlayerController->SetInputMode(InputModeData);
-	PlayerController->bShowMouseCursor = false;
-}
 
 void UMainMenu::HostServer()
 {
@@ -92,7 +43,7 @@ void UMainMenu::JoinServer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("I'm gonna join a server"));
 	if (MenuInterface != nullptr) {
-		if (!ensure(IPAddressField!=nullptr))
+		if (!ensure(IPAddressField != nullptr))
 		{
 			UE_LOG(LogTemp, Error, TEXT("IPAddressField is nullptr"));
 			return;
@@ -116,4 +67,22 @@ void UMainMenu::OpenMainMenu()
 	if (!ensure(MenuSwitcher != nullptr)) return;
 	if (!ensure(MainMenu != nullptr)) return;
 	MenuSwitcher->SetActiveWidget(MainMenu);
+}
+
+void UMainMenu::QuitPressed()
+{
+	UWorld* World = GetWorld();
+	if (!ensure(World!=nullptr))
+	{
+		UE_LOG(LogTemp, Error, TEXT("World in nullptr"));
+		return;
+	}
+
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (!ensure(PlayerController != nullptr))
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController in nullptr"));
+		return;
+	}
+	PlayerController->ConsoleCommand("quit");
 }
